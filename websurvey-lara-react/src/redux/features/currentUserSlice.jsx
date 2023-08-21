@@ -4,10 +4,9 @@ const initialState = {
     currentUser: {
         name: "Sam",
         email: "sam26@gmail.com",
-        image: null,
     },
 
-    currentToken: 1,
+    currentToken: null,
 };
 
 const currentUserSlice = createSlice({
