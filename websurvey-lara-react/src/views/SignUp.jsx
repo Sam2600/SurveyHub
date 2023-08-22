@@ -1,39 +1,53 @@
 import { useState } from "react";
 import { Link } from "react-router-dom";
-import { axiosClient } from "../axios/axios"
+import { axiosClient } from "../axios/axios";
+import { useDispatch } from "react-redux";
+import { setCurrentUserAndToken } from "../redux/features/currentUserSlice";
 
 export const SignUp = () => {
-
     const [user, setUser] = useState({
         name: "",
         email: "",
         password: "",
-        confirmPassword: ""
-    })
+        password_confirmation: "",
+    });
 
-    const [error, setError] = useState({ __html: '' })
+    const dispatch = useDispatch();
+
+    const [error, setError] = useState({ __html: "" });
 
     const handleFormSubmit = (e) => {
         e.preventDefault();
-        axiosClient.post('/sign-up', user).then((response) => console.log(response)).catch((error) => console.log(error))
-    }
+
+        axiosClient
+            .post("/sign-up", user)
+            .then(({ data }) => {
+                dispatch(setCurrentUserAndToken(data));
+            })
+            .catch((error) => {
+                const inputErrorArray = Object.values(
+                    error.response.data.errors
+                );
+                const errorArr = [].concat(...inputErrorArray);
+                setError({ __html: errorArr.join("<br />") });
+            });
+    };
 
     const handleNameInputChange = (e) => {
-        setUser({...user, name: e.target.value})
-    }
+        setUser({ ...user, name: e.target.value });
+    };
 
     const handleEmailInputChange = (e) => {
-        setUser({...user, email: e.target.value})
-    }
+        setUser({ ...user, email: e.target.value });
+    };
 
     const handlePasswordInputChange = (e) => {
-        setUser({...user, password: e.target.value})
-    }
+        setUser({ ...user, password: e.target.value });
+    };
 
     const handleConfirmPasswordChange = (e) => {
-        setUser({...user, confirmPassword: e.target.value})
-    }
-
+        setUser({ ...user, password_confirmation: e.target.value });
+    };
 
     return (
         <>
@@ -50,7 +64,19 @@ export const SignUp = () => {
                 </div>
 
                 <div className="mt-7 sm:mx-auto sm:w-full sm:max-w-sm">
-                    <form onSubmit={handleFormSubmit} className="space-y-4" action="#" method="POST">
+                    {error.__html && (
+                        <div
+                            className="bg-red-500 rounded py-2 px-3 text-white"
+                            dangerouslySetInnerHTML={error}
+                        ></div>
+                    )}
+
+                    <form
+                        onSubmit={handleFormSubmit}
+                        className="space-y-4"
+                        action="#"
+                        method="POST"
+                    >
                         <div>
                             <label
                                 htmlFor="name"
@@ -64,7 +90,7 @@ export const SignUp = () => {
                                     id="name"
                                     name="name"
                                     type="text"
-
+                                    value={user.name}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -83,7 +109,7 @@ export const SignUp = () => {
                                     name="email"
                                     type="email"
                                     autoComplete="email"
-
+                                    value={user.email}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -104,7 +130,7 @@ export const SignUp = () => {
                                     id="password"
                                     name="password"
                                     type="password"
-
+                                    value={user.password}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>
@@ -124,7 +150,7 @@ export const SignUp = () => {
                                     id="confirmPassword"
                                     name="confirmPassword"
                                     type="password"
-
+                                    value={user.password_confirmation}
                                     className="block w-full rounded-md border-0 py-1.5 text-gray-900 shadow-sm ring-1 ring-inset ring-gray-300 placeholder:text-gray-400 focus:ring-2 focus:ring-inset focus:ring-indigo-600 sm:text-sm sm:leading-6"
                                 />
                             </div>

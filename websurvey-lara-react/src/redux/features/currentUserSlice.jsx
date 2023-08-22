@@ -2,11 +2,10 @@ import { createSlice } from "@reduxjs/toolkit";
 
 const initialState = {
     currentUser: {
-        name: "Sam",
-        email: "sam26@gmail.com",
+        name: "",
+        email: "",
+        currentToken: localStorage.getItem("TOKEN") || "",
     },
-
-    currentToken: null,
 };
 
 const currentUserSlice = createSlice({
@@ -14,18 +13,32 @@ const currentUserSlice = createSlice({
     initialState,
 
     reducers: {
-        setCurrentUser: (state, action) => {
-            state.currentUser.name = action.payload.name;
-            state.currentUser.email = action.payload.email;
+
+        setCurrentUserAndToken: (state, action) => {
+            const token = action.payload.token;
+            const user = action.payload.user;
+
+            state.currentUser.name = user.name;
+            state.currentUser.email = user.email;
+
+            if (token) {
+                localStorage.setItem("TOKEN", token);
+            } else {
+                localStorage.removeItem("TOKEN");
+            }
+
+            state.currentUser.currentToken = token;
         },
 
-        setCurrentToken: (state, action) => {
-            //state.currentToken = action.payload;
-        },
+        removeCurrentUserAndToken: (state, action) => {
+           
+            state.currentUser.name = ""
+            state.currentUser.email = ""
+            state.currentUser.currentToken = null
+        }
     },
 });
 
 export default currentUserSlice.reducer;
-export const { setCurrentToken, setCurrentUser } = currentUserSlice.actions;
+export const { setCurrentUserAndToken, removeCurrentUserAndToken } = currentUserSlice.actions;
 export const currentUser = (state) => state.currentUser.currentUser;
-export const currentToken = (state) => state.currentUser.currentToken;

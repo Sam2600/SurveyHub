@@ -3,10 +3,10 @@ import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, UserIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
-import {
-    currentUser,
-    currentToken,
-} from "../../redux/features/currentUserSlice";
+import { currentUser } from "../../redux/features/currentUserSlice";
+import { axiosClient } from "../../axios/axios";
+import { removeCurrentUserAndToken } from "../../redux/features/currentUserSlice";
+import { useDispatch } from "react-redux";
 
 const navigation = [
     { name: "Dashboard", to: "/" },
@@ -18,17 +18,24 @@ function classNames(...classes) {
 }
 
 export const DefaultLayout = () => {
-    
-    const token = useSelector(currentToken);
+
     const user = useSelector(currentUser);
 
-    if (!token) {
+    const dispatch = useDispatch();
+
+    if (!user.currentToken) {
         return <Navigate to="/login" />;
     }
 
     const logout = (e) => {
         e.preventDefault();
-        console.log("logout");
+        axiosClient
+            .post("/logout")
+            .then((res) => {
+                localStorage.removeItem("TOKEN");
+                dispatch(removeCurrentUserAndToken());
+            })
+            .catch((error) => console.error(error));
     };
 
     return (
@@ -94,17 +101,14 @@ export const DefaultLayout = () => {
                                             >
                                                 <Menu.Items className="absolute right-0 z-10 mt-2 w-48 origin-top-right rounded-md bg-white py-1 shadow-lg ring-1 ring-black ring-opacity-5 focus:outline-none">
                                                     <Menu.Item>
-                                                        <a
-                                                            href="#"
-                                                            onClick={(e) =>
-                                                                logout(e)
-                                                            }
+                                                        <button
+                                                            onClick={logout}
                                                             className={
                                                                 "block px-4 py-2 text-sm text-gray-700"
                                                             }
                                                         >
                                                             Sign out
-                                                        </a>
+                                                        </button>
                                                     </Menu.Item>
                                                 </Menu.Items>
                                             </Transition>

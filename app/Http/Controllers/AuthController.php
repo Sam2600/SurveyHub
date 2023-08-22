@@ -53,13 +53,13 @@ class AuthController extends Controller
     }
 
     public function logout(Request $request)
-    {
-        /** @var \App\Models\User $user */
+    {   
+        /** @var User $user */
         $user = Auth::user();
         $user->currentAccessToken()->delete();
 
         return response([
-            "success" => true
+            "status" => "Ok"
         ]);
     }
 }

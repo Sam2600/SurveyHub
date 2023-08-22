@@ -1,11 +1,12 @@
 import { Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
-import { currentToken } from "../../redux/features/currentUserSlice";
+import { currentUser } from "../../redux/features/currentUserSlice";
 
 export const GuestLayout = () => {
-    const token = useSelector(currentToken);
 
-    if (token) {
+    const user = useSelector(currentUser);
+
+    if (user.currentToken) {
         return <Navigate to="/" />;
     }
 

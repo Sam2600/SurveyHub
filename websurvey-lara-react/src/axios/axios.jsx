@@ -1,23 +1,27 @@
 import axios from "axios";
-import { router } from "../routes/Route"
+import { router } from "../routes/Route";
+//import {currentUser} from "../redux/features/currentUserSlice"
 
 export const axiosClient = axios.create({
-    baseURL: `${import.meta.env.VITE_LARA_API_KEY}/api`
+    baseURL: `${import.meta.env.VITE_LARA_API_KEY}/api`,
 });
 
 axiosClient.interceptors.request.use((config) => {
-    const token = '123'
-    config.headers.Authorization = `Bearer${token}`;
+    const token = localStorage.getItem("TOKEN");
+    config.headers.Authorization = `Bearer ${token}`;
     return config;
-})
+});
 
-axiosClient.interceptors.response.use(response => {
-    return response;
-}, (error) => {
-    if (error.response && error.response.status === 401) {
-        router.navigate("/login");
-        return error;
+axiosClient.interceptors.response.use(
+    (response) => {
+        return response;
+    },
+    (error) => {
+        if (error.response && error.response.status === 401) {
+            router.navigate("/login");
+            return error;
+        }
+
+        throw error;
     }
-
-    throw error;
-})
+);
