@@ -19,6 +19,7 @@
     },
     "dependencies": {
         "@heroicons/react": "^2.0.18",
-        "react-hook-form": "^7.45.4"
+        "react-hook-form": "^7.45.4",
+        "uuidv4": "^6.2.13"
     }
 }

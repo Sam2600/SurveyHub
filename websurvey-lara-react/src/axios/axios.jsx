@@ -1,6 +1,4 @@
 import axios from "axios";
-import { router } from "../routes/Route";
-import { Navigate } from "react-router-dom";
 //import {currentUser} from "../redux/features/currentUserSlice"
 
 export const axiosClient = axios.create({
