@@ -1,12 +1,12 @@
 import { DefaultLayoutComponent } from "../components/DefaultLayoutComponent";
 import { useSelector } from "react-redux";
-import { tmpSurveys } from "../redux/features/SurveySlice";
+import { selectAllSurveys } from "../redux/features/SurveySlice";
 import { SurveyListItem } from "../components/SurveyListItem";
 import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { TButton } from "../components/core/TButton";
 
 export const Survey = () => {
-    const surveys = useSelector(tmpSurveys);
+    const surveys = useSelector(selectAllSurveys);
 
     const onDeleteClick = () => {
         console.log("Hola");

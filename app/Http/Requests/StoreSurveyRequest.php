@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests;
 
+use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
 
 class StoreSurveyRequest extends FormRequest
@@ -14,12 +15,12 @@ class StoreSurveyRequest extends FormRequest
     public function authorize()
     {
         return true;
-    } 
+    }
 
     protected function prepareForValidation()
     {
         $this->merge([
-            "user_id" => $this->user()->id
+            "user_id" => $this->user()->id,
         ]);
     }
 
@@ -36,7 +37,7 @@ class StoreSurveyRequest extends FormRequest
             "user_id" => "exists:users,id",
             "status" => "required|boolean",
             "description" => "nullable|string",
-            "expire_date"=> "nullable|date|after:today",
+            "expire_date" => "nullable|date|after:today",
             "questions" => "array",
         ];
     }

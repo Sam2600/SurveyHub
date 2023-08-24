@@ -2,9 +2,11 @@ import { useState } from "react";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { DefaultLayoutComponent } from "../components/DefaultLayoutComponent";
 import { TButton } from "../components/core/TButton";
+import { axiosClient } from "../axios/axios";
+import { useForm } from "react-hook-form"
 
 export const SurveyView = () => {
-  
+
     const [survey, setSurvey] = useState({
         title: "",
         slug: "",
@@ -16,16 +18,55 @@ export const SurveyView = () => {
         questions: [],
     });
 
-    const onImageChoose = () => {
-        console.log("On Image Choose");
+    const [error, setError] = useState("");
+
+    const onImageChoose = (e) => {
+        const file = e.target.files[0];
+        const reader = new FileReader();
+
+        reader.onload = () => {
+            setSurvey({
+                ...survey,
+                image: file,
+                image_url: reader.result,
+            });
+        };
+
+        e.target.value = "";
+        reader.readAsDataURL(file);
     };
 
     const onSubmit = (e) => {
         e.preventDefault();
+
+        const payload = { ...survey };
+
+        if (payload.image) {
+            payload.image = payload.image_url;
+        }
+        delete payload.image_url;
+
+        axiosClient
+            .post("/survey", payload)
+            .then((res) => console.log(res))
+            .catch((err) => {
+                if (err && err.response) {
+                    setError(err.response.data.errors);
+                }
+            });
     };
+
+    const { register, handleSubmit } = useForm()
 
     return (
         <DefaultLayoutComponent title="Create new survey">
+            {/* {error && (
+                <div className="text-white rounded-md p-2 mb-5 bg-red-500">
+                    {Object.values(error).map((err, index) => (
+                        <p className="my-2" key={index}>{err}</p>
+                    ))}
+                </div>
+            )} */}
             <form action="#" method="POST" onSubmit={onSubmit}>
                 <div className="shadow sm:overflow-hidden sm:rounded-md">
                     <div className="space-y-6 bg-white px-4 py-5 sm:p-6">
@@ -53,8 +94,8 @@ export const SurveyView = () => {
                                 >
                                     <input
                                         type="file"
-                                        className="absolute left-0 top-0 right-0 bottom-0 opacity-0"
-                                        onChange={onImageChoose}
+                                        className="absolute left-0 top-0 right-0 bottom-0 opacity-0" {...register}
+                                        // onChange={onImageChoose}
                                     />
                                     Change
                                 </button>
@@ -75,12 +116,13 @@ export const SurveyView = () => {
                                 name="title"
                                 id="title"
                                 value={survey.title}
-                                onChange={(ev) =>
-                                    setSurvey({
-                                        ...survey,
-                                        title: ev.target.value,
-                                    })
-                                }
+                                {...register}
+                                // onChange={(ev) =>
+                                //     setSurvey({
+                                //         ...survey,
+                                //         title: ev.target.value,
+                                //     })
+                                // }
                                 placeholder="Survey Title"
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             />
@@ -100,12 +142,13 @@ export const SurveyView = () => {
                                 name="description"
                                 id="description"
                                 value={survey.description || ""}
-                                onChange={(ev) =>
-                                    setSurvey({
-                                        ...survey,
-                                        description: ev.target.value,
-                                    })
-                                }
+                                {...register}
+                                // onChange={(ev) =>
+                                //     setSurvey({
+                                //         ...survey,
+                                //         description: ev.target.value,
+                                //     })
+                                // }
                                 placeholder="Describe your survey"
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             ></textarea>
@@ -125,12 +168,13 @@ export const SurveyView = () => {
                                 name="expire_date"
                                 id="expire_date"
                                 value={survey.expire_date}
-                                onChange={(ev) =>
-                                    setSurvey({
-                                        ...survey,
-                                        expire_date: ev.target.value,
-                                    })
-                                }
+                                {...register}
+                                // onChange={(ev) =>
+                                //     setSurvey({
+                                //         ...survey,
+                                //         expire_date: ev.target.value,
+                                //     })
+                                // }
                                 className="mt-1 block w-full rounded-md border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 sm:text-sm"
                             />
                         </div>
@@ -144,12 +188,13 @@ export const SurveyView = () => {
                                     name="status"
                                     type="checkbox"
                                     checked={survey.status}
-                                    onChange={(ev) =>
-                                        setSurvey({
-                                            ...survey,
-                                            status: ev.target.checked,
-                                        })
-                                    }
+                                    {...register}
+                                    // onChange={(ev) => {
+                                    //     setSurvey({
+                                    //         ...survey,
+                                    //         status: ev.target.checked,
+                                    //     });
+                                    // }}
                                     className="h-4 w-4 rounded border-gray-300 text-indigo-600 focus:ring-indigo-500"
                                 />
                             </div>

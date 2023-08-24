@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Survey;
 use App\Http\Requests\StoreSurveyRequest;
 use App\Http\Requests\UpdateSurveyRequest;
 use App\Http\Resources\SurveyResource;
 use App\Models\SurveyQuestion;
+use App\Models\Survey;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File as FacadesFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -34,7 +35,7 @@ class SurveyController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(StoreSurveyRequest $request)
-    {
+    {   
         $data = $request->validated();
 
         if (isset($data['image'])) {
@@ -44,7 +45,7 @@ class SurveyController extends Controller
 
         $survey = Survey::create($data);
 
-        foreach ($data['question'] as $question) {
+        foreach ($data['questions'] as $question) {
             $question['survey_id'] = $survey->id;
             $this->createQuestion($question);
         }
@@ -62,12 +63,12 @@ class SurveyController extends Controller
     {
         $user = $request->user();
 
-        if($user->id !== $survey->user_id) {
+        if ($user->id !== $survey->user_id) {
             return abort(403, 'Unauthorized action');
         }
 
         return new SurveyResource($survey);
-    }   
+    }
 
     /**
      * Update the specified resource in storage.
@@ -78,7 +79,46 @@ class SurveyController extends Controller
      */
     public function update(UpdateSurveyRequest $request, Survey $survey)
     {
-        //
+        $data = $request->validated();
+
+        if (isset($data["image"])) {
+            $relativePath = $this->saveImage($data['image']);
+            $data['image'] = $relativePath;
+
+            if ($survey->image) {
+                $absolutePath = public_path($survey->image);
+                FacadesFile::delete($absolutePath);
+            }
+        }
+
+        $survey->update($data);
+
+        $existingIds = $survey->questions()->pluck('id')->toArray();
+
+        $newIds = Arr::pluck($data['questions'], 'id');
+
+        $toDelete = array_diff($existingIds, $newIds);
+
+        $toAdd = array_diff($newIds, $existingIds);
+
+        SurveyQuestion::destroy($toDelete);
+
+        foreach ($data['question'] as $question) {
+            if (in_array($question['id'], $toAdd)) {
+                $question['survey_id'] = $survey->id;
+                $this->createQuestion($question);
+            }
+        };
+
+        $questionMap = collect($data['questions'])->keyBy('id');
+
+        foreach ($survey->question as $question) {
+            if (isset($questionMap[$question->id])) {
+                $this->updateQuestion($question, $questionMap[$question->id]);
+            }
+        }
+
+        return new SurveyResource($survey);
     }
 
     /**
@@ -87,9 +127,22 @@ class SurveyController extends Controller
      * @param  \App\Models\Survey  $survey
      * @return \Illuminate\Http\Response
      */
-    public function destroy(Survey $survey)
+    public function destroy(Survey $survey, Request $request)
     {
-        //
+        $user = $request->user();
+        if ($user->id !== $survey->user_id) {
+            return abort(403, 'Unauthorized action.');
+        }
+
+        $survey->delete();
+
+        // If there is an old image, delete it
+        if ($survey->image) {
+            $absolutePath = public_path($survey->image);
+            FacadesFile::delete($absolutePath);
+        }
+
+        return response('', 204);
     }
 
     private function saveImage($image)
@@ -119,7 +172,7 @@ class SurveyController extends Controller
         $file = Str::random() . '.' . $type;
         $absolutePath = public_path($dir);
         $relativePath = $dir . $file;
-        if(!FacadesFile::exists($absolutePath)){
+        if (!FacadesFile::exists($absolutePath)) {
             FacadesFile::makeDirectory($absolutePath, 0755, true);
         }
 
@@ -131,7 +184,7 @@ class SurveyController extends Controller
 
     private function createQuestion($data)
     {
-        if(is_array($data['data'])) {
+        if (is_array($data['data'])) {
             $data['data'] = json_decode($data['data']);
         }
 
@@ -139,10 +192,26 @@ class SurveyController extends Controller
             "question" => "required|string",
             "type" => ['required', new Enum((QuestionTypeEnum::class))],
             "description"  => "nullable|string",
-            "data" => "persent",
+            "data" => "present",
             "survey_id" => "exists:App\Models\Survey, id"
         ]);
 
         return SurveyQuestion::create($validator->validated());
+    }
+
+    private function updateQuestion(SurveyQuestion $question, $data)
+    {
+        if (is_array($data['data'])) {
+            $data['data'] = json_encode($data['data']);
+        }
+        $validator = Validator::make($data, [
+            'id' => 'exists:App\Models\SurveyQuestion,id',
+            'question' => 'required|string',
+            'type' => ['required', new Enum(QuestionTypeEnum::class)],
+            'description' => 'nullable|string',
+            'data' => 'present',
+        ]);
+
+        return $question->update($validator->validated());
     }
 }
