@@ -4,6 +4,7 @@ import { axiosClient } from "../../axios/axios";
 const initialState = {
     status: "idle",
     error: null,
+    questionTypes: ["text", "select", "radio", "checkbox"],
     surveys: [
         {
             id: 1,
@@ -214,4 +215,5 @@ const surveySlice = createSlice({
 });
 
 export const selectAllSurveys = (state) => state.survey.surveys;
+export const selectAllQuestionTypes = (state) => state.survey.questionTypes;
 export default surveySlice.reducer;
