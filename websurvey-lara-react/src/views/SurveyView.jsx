@@ -6,7 +6,6 @@ import { axiosClient } from "../axios/axios";
 import { SurveyQuestion } from "../components/SurveyQuestion";
 
 export const SurveyView = () => {
-
     const [survey, setSurvey] = useState({
         title: "",
         slug: "",
@@ -21,49 +20,51 @@ export const SurveyView = () => {
     const [error, setError] = useState("");
 
     const onImageChoose = (e) => {
-
-        const file = e.target.files[0]
-        const reader = new FileReader()
+        const file = e.target.files[0];
+        const reader = new FileReader();
 
         reader.onload = () => {
             setSurvey({
                 ...survey,
                 image: file,
-                image_url: reader.result
-            })
-        }
+                image_url: reader.result,
+            });
+        };
 
-        e.target.value = ""
-        reader.readAsDataURL(file)
-
-    }
+        e.target.value = "";
+        reader.readAsDataURL(file);
+    };
 
     const onSubmit = (e) => {
-        e.preventDefault()
+        e.preventDefault();
 
-        const payload = { ...survey }
+        const payload = { ...survey };
 
         if (payload.image) {
-            payload.image = payload.image_url
+            payload.image = payload.image_url;
         }
 
-        delete payload.image_url
+        delete payload.image_url;
 
-        axiosClient.post("/survey", payload).then(res => console.log(res)).catch(err => {
-            if (err && err.response) {
-                setError(err.response.data.errors)
-            }
-        })
+        axiosClient
+            .post("/survey", payload)
+            .then((res) => console.log(res))
+            .catch((err) => {
+                if (err && err.response) {
+                    setError(err.response.data.errors);
+                }
+            });
+    };
 
-    }
-
-    const onSurveyUpdate = (survey) => {
-        setSurvey({...survey})
-    }
+    const onQuestionUpdate = (question) => {
+        setSurvey({
+            ...survey,
+            questions: [...question],
+        });
+    };
 
     return (
         <DefaultLayoutComponent title="Create new survey">
-
             {error && (
                 <div className="text-white rounded-md p-2 mb-5 bg-red-500">
                     {Object.values(error).map((err, index) => (
@@ -215,8 +216,13 @@ export const SurveyView = () => {
                         </div>
                         {/*Active*/}
 
-                        <SurveyQuestion />
-                        
+                        <pre>
+                            {JSON.stringify(survey.questions, undefined, 2)}
+                        </pre>
+                        <SurveyQuestion
+                            questions={survey.questions}
+                            onQuestionUpdate={onQuestionUpdate}
+                        />
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                         <TButton>Save</TButton>
@@ -226,44 +232,3 @@ export const SurveyView = () => {
         </DefaultLayoutComponent>
     );
 };
-
-
-
-/**
- * const onImageChoose = (e) => {
-        const file = e.target.files[0];
-        const reader = new FileReader();
-
-        reader.onload = () => {
-            setSurvey({
-                ...survey,
-                image: file,
-                image_url: reader.result,
-            });
-        };
-
-        e.target.value = "";
-        reader.readAsDataURL(file);
-    };
-
-    const onSubmit = (e) => {
-        e.preventDefault();
-
-        const payload = { ...survey };
-
-        if (payload.image) {
-            payload.image = payload.image_url;
-        }
-
-        delete payload.image_url;
-
-        axiosClient
-            .post("/survey", payload)
-            .then((res) => console.log(res))
-            .catch((err) => {
-                if (err && err.response) {
-                    setError(err.response.data.errors);
-                }
-            });
-    };
- */

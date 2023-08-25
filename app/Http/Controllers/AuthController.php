@@ -62,4 +62,9 @@ class AuthController extends Controller
             "status" => "Ok"
         ]);
     }
+
+    public function me(Request $request)
+    {
+        return $request->user();
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Http\Enums\QuestionTypeEnum;
 use App\Http\Requests\StoreSurveyRequest;
 use App\Http\Requests\UpdateSurveyRequest;
 use App\Http\Resources\SurveyResource;
@@ -12,6 +13,7 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\File as FacadesFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\Validation\Rules\Enum;
 
 class SurveyController extends Controller
@@ -35,9 +37,9 @@ class SurveyController extends Controller
      * @return \Illuminate\Http\Response
      */
     public function store(StoreSurveyRequest $request)
-    {   
+    {
         $data = $request->validated();
-
+        
         if (isset($data['image'])) {
             $relativePath = $this->saveImage($data['image']);
             $data['image'] = $relativePath;
@@ -183,17 +185,28 @@ class SurveyController extends Controller
 
 
     private function createQuestion($data)
-    {
+    {   
+       
         if (is_array($data['data'])) {
-            $data['data'] = json_decode($data['data']);
+            $data['data'] = json_encode($data['data']);
+            
         }
-
+       
         $validator = Validator::make($data, [
             "question" => "required|string",
-            "type" => ['required', new Enum((QuestionTypeEnum::class))],
+            "type" => [
+                'required',
+                Rule::in(
+                    QuestionTypeEnum::TYPE_CHECKBOX->value,
+                    QuestionTypeEnum::TYPE_RADIO->value,
+                    QuestionTypeEnum::TYPE_SELECT->value,
+                    QuestionTypeEnum::TYPE_TEXT->value,
+                    QuestionTypeEnum::TYPE_TEXTAREA->value
+                )
+            ],
             "description"  => "nullable|string",
             "data" => "present",
-            "survey_id" => "exists:App\Models\Survey, id"
+            "survey_id" => "exists:App\Models\Survey,id"
         ]);
 
         return SurveyQuestion::create($validator->validated());
