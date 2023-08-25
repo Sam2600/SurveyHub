@@ -1,8 +1,10 @@
 import { PlusIcon } from "@heroicons/react/24/outline";
 import React, { useState } from "react";
 import {v4 as uuidv4} from "uuid"
+import { QuestionEditor } from "./QuestionEditor";
 
 export const SurveyQuestion = ({ survey, onSurveyUpdate }) => {
+    
     const [model, setModel] = useState({ ...survey });
 
     const addQuestion = () => {
@@ -12,7 +14,7 @@ export const SurveyQuestion = ({ survey, onSurveyUpdate }) => {
                 ...model.questions,
                 {
                     id: uuidv4(),
-                    type: "text",
+                    type: "",
                     question: "",
                     description: "",
                     data: {},
@@ -22,9 +24,14 @@ export const SurveyQuestion = ({ survey, onSurveyUpdate }) => {
     };
 
     const questionChange = (question) => {
-        if (!question) return;
-        //const newQuestions = model.questions.map(q => )
+        if(!question) return;
+
+        
     };
+
+    const deleteQuestion = () => {
+
+    }
 
     return (
         <>

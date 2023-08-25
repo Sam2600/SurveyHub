@@ -3,10 +3,10 @@ import { PhotoIcon } from "@heroicons/react/24/outline";
 import { DefaultLayoutComponent } from "../components/DefaultLayoutComponent";
 import { TButton } from "../components/core/TButton";
 import { axiosClient } from "../axios/axios";
-import { useForm } from "react-hook-form";
 import { SurveyQuestion } from "../components/SurveyQuestion";
 
 export const SurveyView = () => {
+
     const [survey, setSurvey] = useState({
         title: "",
         slug: "",
@@ -56,7 +56,9 @@ export const SurveyView = () => {
             });
     };
 
-    const { register, handleSubmit } = useForm();
+    const onSurveyUpdate = (survey) => {
+        setSurvey({...survey})
+    }
 
     return (
         <DefaultLayoutComponent title="Create new survey">
@@ -98,7 +100,6 @@ export const SurveyView = () => {
                                     <input
                                         type="file"
                                         className="absolute left-0 top-0 right-0 bottom-0 opacity-0"
-                                        {...register}
                                         onChange={onImageChoose}
                                     />
                                     Change
@@ -212,7 +213,7 @@ export const SurveyView = () => {
                         </div>
                         {/*Active*/}
 
-                        <SurveyQuestion />
+                        <SurveyQuestion survey={survey} onSurveyUpdate={onSurveyUpdate} />
                         
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
