@@ -10,6 +10,7 @@ use App\Models\SurveyQuestion;
 use App\Models\Survey;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\File as FacadesFile;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Support\Str;
@@ -27,7 +28,7 @@ class SurveyController extends Controller
     {
         $user = $request->user();
 
-        return SurveyResource::collection(Survey::where("user_id", $user->id)->orderby("created_at", "desc")->paginate(10));
+        return SurveyResource::collection(Survey::where("user_id", $user->id)->orderby("created_at", "desc")->paginate(2));
     }
 
     /**
@@ -38,8 +39,9 @@ class SurveyController extends Controller
      */
     public function store(StoreSurveyRequest $request)
     {
+
         $data = $request->validated();
-        
+
         if (isset($data['image'])) {
             $relativePath = $this->saveImage($data['image']);
             $data['image'] = $relativePath;
@@ -51,7 +53,6 @@ class SurveyController extends Controller
             $question['survey_id'] = $survey->id;
             $this->createQuestion($question);
         }
-
         return new SurveyResource(($survey));
     }
 
@@ -63,6 +64,7 @@ class SurveyController extends Controller
      */
     public function show(Survey $survey, Request $request)
     {
+
         $user = $request->user();
 
         if ($user->id !== $survey->user_id) {
@@ -94,6 +96,7 @@ class SurveyController extends Controller
         }
 
         $survey->update($data);
+
 
         $existingIds = $survey->questions()->pluck('id')->toArray();
 
@@ -185,13 +188,12 @@ class SurveyController extends Controller
 
 
     private function createQuestion($data)
-    {   
-       
+    {
+
         if (is_array($data['data'])) {
             $data['data'] = json_encode($data['data']);
-            
         }
-       
+
         $validator = Validator::make($data, [
             "question" => "required|string",
             "type" => [

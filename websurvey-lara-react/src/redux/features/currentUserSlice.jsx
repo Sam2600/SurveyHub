@@ -1,4 +1,5 @@
-import { createSlice } from "@reduxjs/toolkit";
+import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
+import { axiosClient } from "../../axios/axios";
 
 const initialState = {
     currentUser: {
@@ -7,6 +8,11 @@ const initialState = {
         currentToken: localStorage.getItem("TOKEN") || "",
     },
 };
+
+export const fetchCurrentUser = createAsyncThunk("currentUser/fetchCurrentUser", async () => {
+    const response = await axiosClient.get("/me");
+    return response.data;
+});
 
 const currentUserSlice = createSlice({
     name: "currentUser",
@@ -31,12 +37,19 @@ const currentUserSlice = createSlice({
         },
 
         removeCurrentUserAndToken: (state, action) => {
-           
+
             state.currentUser.name = ""
             state.currentUser.email = ""
             state.currentUser.currentToken = null
         }
     },
+
+    extraReducers: (builder) => {
+        builder.addCase(fetchCurrentUser.fulfilled, (state, action) => {
+            state.currentUser.name = action.payload?.name;
+            state.currentUser.email = action.payload?.email;
+        });
+    }
 });
 
 export default currentUserSlice.reducer;

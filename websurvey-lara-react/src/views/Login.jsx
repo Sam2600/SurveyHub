@@ -2,14 +2,10 @@ import { LockClosedIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
 import { Link } from "react-router-dom";
 import { axiosClient } from "../axios/axios";
-import { useDispatch, useSelector } from "react-redux";
-import { setCurrentUserAndToken, currentUser } from "../redux/features/currentUserSlice";
+import { useDispatch } from "react-redux";
+import { setCurrentUserAndToken } from "../redux/features/currentUserSlice";
 
 export const Login = () => {
-
-    const user = useSelector(currentUser);
-
-    console.log(user.currentToken)
 
     const [loginUser, setLoginUser] = useState({
         email: "",
@@ -19,6 +15,7 @@ export const Login = () => {
     const dispatch = useDispatch();
 
     const [error, setError] = useState({ __html: "" });
+
 
     const handleEmailInputChange = (e) => {
         setLoginUser({
@@ -38,17 +35,27 @@ export const Login = () => {
         e.preventDefault();
         axiosClient
             .post("/login", loginUser)
-            .then(({data}) => dispatch(setCurrentUserAndToken(data)))
+            .then(({ data }) => dispatch(setCurrentUserAndToken(data)))
             .catch((error) => {
-                if (error.response) {
+
+                if (error.response.data.errors) {
+
                     const inputErrorArray = Object.values(
                         error.response.data.errors
                     );
+
                     const errorArr = [].concat(...inputErrorArray);
-                    setError({ __html: errorArr.join("<br />") });
+                    setError({ __html: errorArr.join("<br/> <br />") });
                 }
 
-                console.error(error);
+                if (error.response.data.error) {
+
+                    const err = error.response.data.error
+
+                    setError({ __html: err });
+                }
+
+                return error
             });
     };
 

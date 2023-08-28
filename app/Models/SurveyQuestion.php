@@ -17,4 +17,9 @@ class SurveyQuestion extends Model
         "data",
         "survey_id"
     ];
+
+    public function survey()
+    {
+        return $this->belongsTo(Survey::class);
+    }
 }

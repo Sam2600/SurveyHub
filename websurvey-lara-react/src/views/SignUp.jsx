@@ -5,6 +5,7 @@ import { useDispatch } from "react-redux";
 import { setCurrentUserAndToken } from "../redux/features/currentUserSlice";
 
 export const SignUp = () => {
+
     const [user, setUser] = useState({
         name: "",
         email: "",

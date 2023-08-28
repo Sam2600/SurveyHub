@@ -10,7 +10,8 @@ export const QuestionEditor = ({
     index = 0,
     question,
 }) => {
-    const [model, setModel] = useState({ ...question });
+
+    const [model, setModel] = useState(question);
 
     const questionTypes = useSelector(selectAllQuestionTypes);
 
@@ -23,7 +24,6 @@ export const QuestionEditor = ({
     };
 
     const onTypeChange = (e) => {
-       
         setModel({
             ...model,
             type: e.target.value,
@@ -43,6 +43,7 @@ export const QuestionEditor = ({
     return (
         <>
             <div>
+
                 <div className="flex justify-between mb-3">
                     <h4>
                         {index + 1}. {model.question}
@@ -80,7 +81,7 @@ export const QuestionEditor = ({
                             type="text"
                             name="question"
                             id="question"
-                            value={model.question}
+                            value={model.question || ""}
                             onChange={(ev) =>
                                 setModel({
                                     ...model,
@@ -103,7 +104,7 @@ export const QuestionEditor = ({
                         <select
                             id="questionType"
                             name="questionType"
-                            value={model.type}
+                            value={model.type || ""}
                             onChange={onTypeChange}
                             className="mt-1 block w-full rounded-md border border-gray-300 bg-white py-2 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
                         >

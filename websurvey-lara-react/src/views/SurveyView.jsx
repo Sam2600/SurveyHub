@@ -1,11 +1,15 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { PhotoIcon } from "@heroicons/react/24/outline";
 import { DefaultLayoutComponent } from "../components/DefaultLayoutComponent";
 import { TButton } from "../components/core/TButton";
 import { axiosClient } from "../axios/axios";
 import { SurveyQuestion } from "../components/SurveyQuestion";
+import { useNavigate, useParams } from "react-router-dom";
 
 export const SurveyView = () => {
+
+    const { id } = useParams();
+
     const [survey, setSurvey] = useState({
         title: "",
         slug: "",
@@ -16,6 +20,16 @@ export const SurveyView = () => {
         expire_date: "",
         questions: [],
     });
+
+    useEffect(() => {
+        if (id) {
+            axiosClient.get(`/survey/${id}`)
+                .then(({ data }) => {
+                    setSurvey(data.data);
+                })
+                .catch(err => console.log(err))
+        }
+    }, []);
 
     const [error, setError] = useState("");
 
@@ -35,6 +49,8 @@ export const SurveyView = () => {
         reader.readAsDataURL(file);
     };
 
+    const navigate = useNavigate();
+
     const onSubmit = (e) => {
         e.preventDefault();
 
@@ -48,7 +64,21 @@ export const SurveyView = () => {
 
         axiosClient
             .post("/survey", payload)
-            .then((res) => console.log(res))
+            .then(() => {
+                setSurvey({
+                    title: "",
+                    slug: "",
+                    status: false,
+                    description: "",
+                    image: null,
+                    image_url: null,
+                    expire_date: "",
+                    questions: [],
+                })
+
+                navigate("/surveys")
+
+            })
             .catch((err) => {
                 if (err && err.response) {
                     setError(err.response.data.errors);
@@ -65,6 +95,7 @@ export const SurveyView = () => {
 
     return (
         <DefaultLayoutComponent title="Create new survey">
+
             {error && (
                 <div className="text-white rounded-md p-2 mb-5 bg-red-500">
                     {Object.values(error).map((err, index) => (
@@ -123,7 +154,7 @@ export const SurveyView = () => {
                                 type="text"
                                 name="title"
                                 id="title"
-                                value={survey.title}
+                                value={survey.title || ""}
                                 onChange={(ev) =>
                                     setSurvey({
                                         ...survey,
@@ -173,7 +204,7 @@ export const SurveyView = () => {
                                 type="date"
                                 name="expire_date"
                                 id="expire_date"
-                                value={survey.expire_date}
+                                value={survey.expire_date || ""}
                                 onChange={(ev) =>
                                     setSurvey({
                                         ...survey,
@@ -192,7 +223,7 @@ export const SurveyView = () => {
                                     id="status"
                                     name="status"
                                     type="checkbox"
-                                    checked={survey.status}
+                                    checked={survey.status || ""}
                                     onChange={(ev) => {
                                         setSurvey({
                                             ...survey,
@@ -216,19 +247,19 @@ export const SurveyView = () => {
                         </div>
                         {/*Active*/}
 
-                        <pre>
-                            {JSON.stringify(survey.questions, undefined, 2)}
-                        </pre>
-                        <SurveyQuestion
-                            questions={survey.questions}
+
+                        {survey.questions ? <SurveyQuestion questions={survey.questions}
                             onQuestionUpdate={onQuestionUpdate}
-                        />
+                        /> : <></>}
+
+
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                         <TButton>Save</TButton>
                     </div>
                 </div>
             </form>
+            
         </DefaultLayoutComponent>
     );
 };

@@ -1,11 +1,11 @@
-import { Fragment } from "react";
+import { Fragment, useEffect } from "react";
 import { Disclosure, Menu, Transition } from "@headlessui/react";
 import { Bars3Icon, UserIcon, XMarkIcon } from "@heroicons/react/24/outline";
 import { NavLink, Navigate, Outlet } from "react-router-dom";
 import { useSelector } from "react-redux";
 import { currentUser } from "../../redux/features/currentUserSlice";
 import { axiosClient } from "../../axios/axios";
-import { removeCurrentUserAndToken } from "../../redux/features/currentUserSlice";
+import { removeCurrentUserAndToken, fetchCurrentUser } from "../../redux/features/currentUserSlice";
 import { useDispatch } from "react-redux";
 
 const navigation = [
@@ -23,6 +23,10 @@ export const DefaultLayout = () => {
 
     const dispatch = useDispatch();
 
+    useEffect( () => {
+        dispatch(fetchCurrentUser())
+    }, [])
+
     if (!user.currentToken) {
         return <Navigate to="/login" />;
     }
@@ -31,7 +35,7 @@ export const DefaultLayout = () => {
         e.preventDefault();
         axiosClient
             .post("/logout")
-            .then((res) => {
+            .then(() => {
                 localStorage.removeItem("TOKEN");
                 dispatch(removeCurrentUserAndToken());
             })

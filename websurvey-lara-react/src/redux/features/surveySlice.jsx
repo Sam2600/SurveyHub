@@ -5,8 +5,61 @@ const initialState = {
     status: "idle",
     error: null,
     questionTypes: ["text", "select", "radio", "checkbox"],
-    surveys: [
-        {
+    surveys: [],
+    singleSurvey: null,
+    meta: null
+};
+
+export const fetchSurvey = createAsyncThunk("survey/fetchSurveys", async (url) => {
+    url = url || "/survey"
+    const response = await axiosClient.get(url);
+    const data = response.data;
+    return data;
+});
+
+export const fetchSingleSurvey = createAsyncThunk("survey/fetchSurveys", async (id) => {
+    const response = await axiosClient.get(`/survey/${id}`);
+    const data = response.data;
+    return data;
+});
+
+const surveySlice = createSlice({
+    name: "survey",
+    initialState,
+    reducers: {},
+    extraReducers: (builder) => {
+        builder
+            .addCase(fetchSurvey.pending, (state) => {
+                state.status = "pending";
+            })
+            .addCase(fetchSurvey.fulfilled, (state, action) => {
+                state.surveys = action.payload?.data;
+                state.meta = action.payload?.meta;
+                state.status = "success";
+            })
+            .addCase(fetchSurvey.rejected, (state, action) => {
+                state.error = action.error?.message;
+            })
+            // .addCase(fetchSingleSurvey.fulfilled, (state, action) => {
+            //     state.singleSurvey = action.payload;
+            // })
+    },
+});
+
+export const selectAllSurveys = (state) => state.survey.surveys;
+
+export const singleSurvey = (state) => state.survey.singleSurvey;
+
+export const status = (state) => state.survey.status;
+export const selectAllQuestionTypes = (state) => state.survey.questionTypes;
+export const meta = (state) => state.survey.meta;
+export const error = (state) => state.survey.error;
+export default surveySlice.reducer;
+
+
+/**
+ *
+ * {
             id: 1,
             image_url:
                 "https://api.yoursurveys.xyz/images/vJutXzn02CDwdOyh.png",
@@ -185,35 +238,4 @@ const initialState = {
             expire_date: "2022-01-20",
             questions: [],
         },
-    ],
-};
-
-export const fetchSurvey = createAsyncThunk("survey/fetchSurveys", async () => {
-    const response = await axiosClient.get("surveys");
-    const data = response.data;
-    return data;
-});
-
-const surveySlice = createSlice({
-    name: "survey",
-    initialState,
-    reducers: {},
-    extraReducers: (builder) => {
-        builder
-            .addCase(fetchSurvey.pending, (state) => {
-                state.status = "pending";
-            })
-
-            .addCase(fetchSurvey.fulfilled, (state, action) => {
-                state.surveys = action.payload;
-                state.status = "success";
-            })
-            .addCase(fetchSurvey.rejected, (state, action) => {
-                state.error = action.error.message;
-            });
-    },
-});
-
-export const selectAllSurveys = (state) => state.survey.surveys;
-export const selectAllQuestionTypes = (state) => state.survey.questionTypes;
-export default surveySlice.reducer;
+ */
