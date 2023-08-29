@@ -50,6 +50,7 @@ class SurveyController extends Controller
         $survey = Survey::create($data);
 
         foreach ($data['questions'] as $question) {
+
             $question['survey_id'] = $survey->id;
             $this->createQuestion($question);
         }
@@ -83,6 +84,7 @@ class SurveyController extends Controller
      */
     public function update(UpdateSurveyRequest $request, Survey $survey)
     {
+
         $data = $request->validated();
 
         if (isset($data["image"])) {
@@ -97,7 +99,6 @@ class SurveyController extends Controller
 
         $survey->update($data);
 
-
         $existingIds = $survey->questions()->pluck('id')->toArray();
 
         $newIds = Arr::pluck($data['questions'], 'id');
@@ -108,21 +109,21 @@ class SurveyController extends Controller
 
         SurveyQuestion::destroy($toDelete);
 
-        foreach ($data['question'] as $question) {
+        // Create new questions
+        foreach ($data['questions'] as $question) {
             if (in_array($question['id'], $toAdd)) {
                 $question['survey_id'] = $survey->id;
                 $this->createQuestion($question);
             }
-        };
+        }
 
+        // Update existing questions
         $questionMap = collect($data['questions'])->keyBy('id');
-
-        foreach ($survey->question as $question) {
+        foreach ($survey->questions as $question) {
             if (isset($questionMap[$question->id])) {
                 $this->updateQuestion($question, $questionMap[$question->id]);
             }
         }
-
         return new SurveyResource($survey);
     }
 
@@ -134,6 +135,7 @@ class SurveyController extends Controller
      */
     public function destroy(Survey $survey, Request $request)
     {
+
         $user = $request->user();
         if ($user->id !== $survey->user_id) {
             return abort(403, 'Unauthorized action.');
@@ -216,9 +218,11 @@ class SurveyController extends Controller
 
     private function updateQuestion(SurveyQuestion $question, $data)
     {
+
         if (is_array($data['data'])) {
             $data['data'] = json_encode($data['data']);
         }
+
         $validator = Validator::make($data, [
             'id' => 'exists:App\Models\SurveyQuestion,id',
             'question' => 'required|string',
