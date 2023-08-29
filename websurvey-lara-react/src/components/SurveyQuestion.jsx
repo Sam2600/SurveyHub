@@ -5,12 +5,10 @@ import { v4 as uuidv4 } from "uuid";
 import { QuestionEditor } from "../components/QuestionEditor";
 
 export const SurveyQuestion = ({ questions, onQuestionUpdate }) => {
-
     const [myQuestions, setMyQuestions] = useState([...questions]);
 
     const addQuestion = (index) => {
-
-        index = index !== undefined ? index : myQuestions.length
+        index = index !== undefined ? index : myQuestions.length;
 
         myQuestions.splice(index, 0, {
             id: uuidv4(),
@@ -18,28 +16,23 @@ export const SurveyQuestion = ({ questions, onQuestionUpdate }) => {
             question: "",
             description: "",
             data: {},
-        })
+        });
         setMyQuestions([...myQuestions]);
-        onQuestionUpdate(myQuestions)
+        onQuestionUpdate(myQuestions);
     };
 
     const questionChange = (question) => {
-
-        console.log(question)
-
         if (!question) return;
 
         const newQuestions = myQuestions.map((q) => {
             if (q.id == question.id) {
-                console.log({ ...question })
                 return { ...question };
             }
             return q;
         });
 
         setMyQuestions(newQuestions);
-        console.log(myQuestions)
-        onQuestionUpdate(newQuestions)
+        onQuestionUpdate(newQuestions);
     };
 
     const deleteQuestion = (question) => {
@@ -47,11 +40,11 @@ export const SurveyQuestion = ({ questions, onQuestionUpdate }) => {
         const newQuestions = myQuestions.filter((q) => q.id !== question.id);
 
         setMyQuestions(newQuestions);
-        onQuestionUpdate(newQuestions)
+        onQuestionUpdate(newQuestions);
     };
 
     useEffect(() => {
-        setMyQuestions(questions)
+        setMyQuestions(questions);
     }, [questions]);
 
     return (
@@ -80,9 +73,9 @@ export const SurveyQuestion = ({ questions, onQuestionUpdate }) => {
                 ))
             ) : (
                 <div className="text-gray-400 text-center py-4">
-                    You don't have any questions created
+                    You don&apos;t have any questions created
                 </div>
             )}
         </>
     );
-}
+};

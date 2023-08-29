@@ -5,9 +5,9 @@ import { TButton } from "../components/core/TButton";
 import { axiosClient } from "../axios/axios";
 import { SurveyQuestion } from "../components/SurveyQuestion";
 import { useNavigate, useParams } from "react-router-dom";
+import { toast } from "react-toastify";
 
 export const SurveyView = () => {
-
     const { id } = useParams();
 
     const [survey, setSurvey] = useState({
@@ -23,11 +23,12 @@ export const SurveyView = () => {
 
     useEffect(() => {
         if (id) {
-            axiosClient.get(`/survey/${id}`)
+            axiosClient
+                .get(`/survey/${id}`)
                 .then(({ data }) => {
                     setSurvey(data.data);
                 })
-                .catch(err => console.log(err))
+                .catch((err) => console.log(err));
         }
     }, []);
 
@@ -62,28 +63,32 @@ export const SurveyView = () => {
 
         delete payload.image_url;
 
-        axiosClient
-            .post("/survey", payload)
-            .then(() => {
-                setSurvey({
-                    title: "",
-                    slug: "",
-                    status: false,
-                    description: "",
-                    image: null,
-                    image_url: null,
-                    expire_date: "",
-                    questions: [],
-                })
+        let res = null;
 
-                navigate("/surveys")
+        if (id) {
+            res = axiosClient.put(`/survey/${id}`, payload);
+        } else {
+            res = axiosClient.post("/survey", payload);
+        }
 
-            })
-            .catch((err) => {
-                if (err && err.response) {
-                    setError(err.response.data.errors);
-                }
+        res.then(() => {
+            setSurvey({
+                title: "",
+                slug: "",
+                status: false,
+                description: "",
+                image: null,
+                image_url: null,
+                expire_date: "",
+                questions: [],
             });
+
+            navigate("/surveys");
+        }).catch((err) => {
+            if (err && err.response) {
+                setError(err.response.data.errors);
+            }
+        });
     };
 
     const onQuestionUpdate = (question) => {
@@ -94,8 +99,9 @@ export const SurveyView = () => {
     };
 
     return (
-        <DefaultLayoutComponent title="Create new survey">
-
+        <DefaultLayoutComponent
+            title={!id ? "Create new survey" : "Update survey"}
+        >
             {error && (
                 <div className="text-white rounded-md p-2 mb-5 bg-red-500">
                     {Object.values(error).map((err, index) => (
@@ -247,19 +253,20 @@ export const SurveyView = () => {
                         </div>
                         {/*Active*/}
 
-
-                        {survey.questions ? <SurveyQuestion questions={survey.questions}
-                            onQuestionUpdate={onQuestionUpdate}
-                        /> : <></>}
-
-
+                        {survey.questions ? (
+                            <SurveyQuestion
+                                questions={survey.questions}
+                                onQuestionUpdate={onQuestionUpdate}
+                            />
+                        ) : (
+                            <></>
+                        )}
                     </div>
                     <div className="bg-gray-50 px-4 py-3 text-right sm:px-6">
                         <TButton>Save</TButton>
                     </div>
                 </div>
             </form>
-            
         </DefaultLayoutComponent>
     );
 };

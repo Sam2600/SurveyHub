@@ -4,8 +4,13 @@ import {
     TrashIcon,
 } from "@heroicons/react/24/outline";
 import { TButton } from "./core/TButton";
+import { useState } from "react";
 
-export const SurveyListItem = ({ survey, onDeleteClick }) => {
+export const SurveyListItem = ({ survey, onDeleteClick}) => {
+
+    const handleDelete = (survey) => {
+        onDeleteClick(survey);
+    };
 
     return (
         <div className="flex flex-col py-4 px-5 shadow-md bg-white hover:bg-gray-h[470px]">
@@ -33,7 +38,7 @@ export const SurveyListItem = ({ survey, onDeleteClick }) => {
                     </TButton>
                     {survey.id && (
                         <TButton
-                            onClick={onDeleteClick}
+                            onClick={() => handleDelete(survey.id)}
                             circle
                             link
                             color="red"
