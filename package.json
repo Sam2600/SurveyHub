@@ -21,6 +21,7 @@
         "@heroicons/react": "^2.0.18",
         "react-hook-form": "^7.45.4",
         "react-notifications-component": "^4.0.1",
+        "uuid": "^9.0.1",
         "uuidv4": "^6.2.13"
     }
 }
